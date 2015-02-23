@@ -7,36 +7,43 @@ namespace battleships
 {
 	public class AiTester
 	{
-		private static readonly Logger resultsLog = LogManager.GetLogger("results");
+		private readonly Logger resultsLog;
 		private readonly Settings settings;
+        private readonly MapGenerator mapGenerator;
+	    private readonly GameVisualizer gameVisualizer;
+	    private readonly IAiFactory aiFactory;
+	    private readonly IGameFactory gameFactory;
 
-		public AiTester(Settings settings)
+	    public AiTester(Settings settings, Logger logger, MapGenerator mapGenerator, 
+            GameVisualizer gameVisualizer, IAiFactory aiFactory, IGameFactory gameFactory)
 		{
 			this.settings = settings;
+            resultsLog = logger;
+            this.mapGenerator = mapGenerator;
+            this.gameVisualizer = gameVisualizer;
+            this.aiFactory = aiFactory;
+	        this.gameFactory = gameFactory;
 		}
 
-		public void TestSingleFile(string exe)
-		{
-			var gen = new MapGenerator(settings, new Random(settings.RandomSeed));
-			var vis = new GameVisualizer();
-			var monitor = new ProcessMonitor(TimeSpan.FromSeconds(settings.TimeLimitSeconds * settings.GamesCount), settings.MemoryLimit);
+		public void TestSingleFile()
+		{            			
 			var badShots = 0;
 			var crashes = 0;
 			var gamesPlayed = 0;
 			var shots = new List<int>();
-			var ai = new Ai(exe, monitor);
+		    var ai = aiFactory.CreateAi();
 			for (var gameIndex = 0; gameIndex < settings.GamesCount; gameIndex++)
 			{
-				var map = gen.GenerateMap();
-				var game = new Game(map, ai);
-				RunGameToEnd(game, vis);
+				var map = mapGenerator.GenerateMap();
+				var game = gameFactory.CreateGame(map, ai);
+				RunGameToEnd(game);
 				gamesPlayed++;
 				badShots += game.BadShots;
 				if (game.AiCrashed)
 				{
 					crashes++;
 					if (crashes > settings.CrashLimit) break;
-					ai = new Ai(exe, monitor);
+                    ai = aiFactory.CreateAi();
 				}
 				else
 					shots.Add(game.TurnsCount);
@@ -51,14 +58,14 @@ namespace battleships
 			WriteTotal(ai, shots, crashes, badShots, gamesPlayed);
 		}
 
-		private void RunGameToEnd(Game game, GameVisualizer vis)
+		private void RunGameToEnd(Game game)
 		{
 			while (!game.IsOver())
 			{
 				game.MakeStep();
 				if (settings.Interactive)
 				{
-					vis.Visualize(game);
+					gameVisualizer.Visualize(game);
 					if (game.AiCrashed)
 						Console.WriteLine(game.LastError.Message);
 					Console.ReadKey();

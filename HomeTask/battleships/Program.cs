@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Threading;
+using NLog;
 
 namespace battleships
 {
@@ -17,12 +18,20 @@ namespace battleships
 				return;
 			}
 			var aiPath = args[0];
+		    if (!File.Exists(aiPath)){
+		        Console.WriteLine("No AI exe-file " + aiPath);
+		        return;
+		    }
 			var settings = new Settings("settings.txt");
-			var tester = new AiTester(settings);
-			if (File.Exists(aiPath))
-				tester.TestSingleFile(aiPath);
-			else
-				Console.WriteLine("No AI exe-file " + aiPath);
+		    var logger = LogManager.GetLogger("results");
+            var mapGenerator = new MapGenerator(settings, new Random(settings.RandomSeed));
+            var gameVisualizer = new GameVisualizer();
+            var processMonitor = new ProcessMonitor(
+                TimeSpan.FromSeconds(settings.TimeLimitSeconds * settings.GamesCount), settings.MemoryLimit);
+		    var aiFactory = new AiFactory(aiPath, processMonitor);
+		    var gameFactory = new GameFactory();
+            var tester = new AiTester(settings, logger, mapGenerator, gameVisualizer, aiFactory, gameFactory);
+            tester.TestSingleFile();
 		}
 	}
 }
