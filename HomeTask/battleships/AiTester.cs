@@ -9,20 +9,20 @@ namespace battleships
 	{
 		private readonly Logger resultsLog;
 		private readonly Settings settings;
-        private readonly MapGenerator mapGenerator;
-	    private readonly GameVisualizer gameVisualizer;
-	    private readonly IAiFactory aiFactory;
-	    private readonly IGameFactory gameFactory;
+		private readonly MapGenerator mapGenerator;
+		private readonly GameVisualizer gameVisualizer;
+		private readonly IAiFactory aiFactory;
+		private readonly IGameFactory gameFactory;
 
-	    public AiTester(Settings settings, Logger logger, MapGenerator mapGenerator, 
-            GameVisualizer gameVisualizer, IAiFactory aiFactory, IGameFactory gameFactory)
+		public AiTester(Settings settings, Logger logger, MapGenerator mapGenerator, 
+			GameVisualizer gameVisualizer, IAiFactory aiFactory, IGameFactory gameFactory)
 		{
 			this.settings = settings;
-            resultsLog = logger;
-            this.mapGenerator = mapGenerator;
-            this.gameVisualizer = gameVisualizer;
-            this.aiFactory = aiFactory;
-	        this.gameFactory = gameFactory;
+			resultsLog = logger;
+			this.mapGenerator = mapGenerator;
+			this.gameVisualizer = gameVisualizer;
+			this.aiFactory = aiFactory;
+			this.gameFactory = gameFactory;
 		}
 
 		public void TestSingleFile()
@@ -31,7 +31,7 @@ namespace battleships
 			var crashes = 0;
 			var gamesPlayed = 0;
 			var shots = new List<int>();
-		    var ai = aiFactory.CreateAi();
+			var ai = aiFactory.CreateAi();
 			for (var gameIndex = 0; gameIndex < settings.GamesCount; gameIndex++)
 			{
 				var map = mapGenerator.GenerateMap();
@@ -43,7 +43,7 @@ namespace battleships
 				{
 					crashes++;
 					if (crashes > settings.CrashLimit) break;
-                    ai = aiFactory.CreateAi();
+					ai = aiFactory.CreateAi();
 				}
 				else
 					shots.Add(game.TurnsCount);

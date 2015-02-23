@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace battleships
 {
-    public interface IGameFactory
-    {
-        Game CreateGame(Map gameMap, Ai ai);
-    }
+	public interface IGameFactory
+	{
+		Game CreateGame(Map gameMap, Ai ai);
+	}
 
-    class GameFactory : IGameFactory
-    {
-        public Game CreateGame(Map gameMap, Ai ai)
-        {
-            return new Game(gameMap, ai);
-        }
-    }
+	class GameFactory : IGameFactory
+	{
+		public Game CreateGame(Map gameMap, Ai ai)
+		{
+			return new Game(gameMap, ai);
+		}
+	}
 }
