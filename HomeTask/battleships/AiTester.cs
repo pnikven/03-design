@@ -14,11 +14,11 @@ namespace battleships
 		private readonly IAiFactory aiFactory;
 		private readonly IGameFactory gameFactory;
 
-		public AiTester(Settings settings, Logger logger, MapGenerator mapGenerator, 
+		public AiTester(Settings settings, ILoggerFactory loggerFactory, MapGenerator mapGenerator, 
 			GameVisualizer gameVisualizer, IAiFactory aiFactory, IGameFactory gameFactory)
 		{
 			this.settings = settings;
-			resultsLog = logger;
+			resultsLog = loggerFactory.CreateLogger();
 			this.mapGenerator = mapGenerator;
 			this.gameVisualizer = gameVisualizer;
 			this.aiFactory = aiFactory;

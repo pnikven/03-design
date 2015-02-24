@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Threading;
-using NLog;
+using Ninject;
 
 namespace battleships
 {
@@ -22,16 +22,21 @@ namespace battleships
 				Console.WriteLine("No AI exe-file " + aiPath);
 				return;
 			}
-			var settings = new Settings("settings.txt");
-			var logger = LogManager.GetLogger("results");
-			var mapGenerator = new MapGenerator(settings, new Random(settings.RandomSeed));
-			var gameVisualizer = new GameVisualizer();
-			var processMonitor = new ProcessMonitor(
-				TimeSpan.FromSeconds(settings.TimeLimitSeconds * settings.GamesCount), settings.MemoryLimit);
-			var aiFactory = new AiFactory(aiPath, processMonitor);
-			var gameFactory = new GameFactory();
-			var tester = new AiTester(settings, logger, mapGenerator, gameVisualizer, aiFactory, gameFactory);
-			tester.TestSingleFile();
+			var standardKernel = new StandardKernel();
+			standardKernel.Bind<Settings>().To<Settings>().InSingletonScope()
+				.WithConstructorArgument("settingsFilename", "settings.txt");
+			standardKernel.Bind<ILoggerFactory>().To<LoggerFactory>()
+				.WithConstructorArgument("loggerName", "results");
+			var settings = standardKernel.Get<Settings>();
+			standardKernel.Bind<MapGenerator>().To<MapGenerator>()
+				.WithConstructorArgument("random", new Random(settings.RandomSeed));
+			standardKernel.Bind<ProcessMonitor>().To<ProcessMonitor>()
+				.WithConstructorArgument("timeLimit", TimeSpan.FromSeconds(settings.TimeLimitSeconds*settings.GamesCount))
+				.WithConstructorArgument("memoryLimit", (long)settings.MemoryLimit);
+			standardKernel.Bind<IAiFactory>().To<AiFactory>()
+				.WithConstructorArgument("aiExePath", aiPath);
+			standardKernel.Bind<IGameFactory>().To<GameFactory>();
+			standardKernel.Get<AiTester>().TestSingleFile();
 		}
 	}
 }
