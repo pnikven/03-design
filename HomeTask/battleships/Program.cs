@@ -22,21 +22,25 @@ namespace battleships
 				Console.WriteLine("No AI exe-file " + aiPath);
 				return;
 			}
+
 			var standardKernel = new StandardKernel();
 			standardKernel.Bind<Settings>().To<Settings>().InSingletonScope()
 				.WithConstructorArgument("settingsFilename", "settings.txt");
 			standardKernel.Bind<ILoggerFactory>().To<LoggerFactory>()
 				.WithConstructorArgument("loggerName", "results");
 			var settings = standardKernel.Get<Settings>();
-			standardKernel.Bind<MapGenerator>().To<MapGenerator>()
+			standardKernel.Bind<IMapGenerator>().To<MapGenerator>()
 				.WithConstructorArgument("random", new Random(settings.RandomSeed));
-			standardKernel.Bind<ProcessMonitor>().To<ProcessMonitor>()
+			standardKernel.Bind<IGameVisualizer>().To<GameVisualizer>();
+			standardKernel.Bind<IProcessMonitor>().To<ProcessMonitor>()
 				.WithConstructorArgument("timeLimit", TimeSpan.FromSeconds(settings.TimeLimitSeconds*settings.GamesCount))
 				.WithConstructorArgument("memoryLimit", (long)settings.MemoryLimit);
 			standardKernel.Bind<IAiFactory>().To<AiFactory>()
 				.WithConstructorArgument("aiExePath", aiPath);
 			standardKernel.Bind<IGameFactory>().To<GameFactory>();
-			standardKernel.Get<AiTester>().TestSingleFile();
+			standardKernel.Bind<IAiTester>().To<AiTester>();
+
+			standardKernel.Get<IAiTester>().TestSingleFile();
 		}
 	}
 }

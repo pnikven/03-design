@@ -1,11 +1,15 @@
 using System;
 using System.Linq;
-using System.Threading;
 using NUnit.Framework;
 
 namespace battleships
 {
-	public class MapGenerator
+	public interface IMapGenerator
+	{
+		Map GenerateMap();
+	}
+
+	public class MapGenerator : IMapGenerator
 	{
 		private readonly Settings settings;
 		private readonly Random random;

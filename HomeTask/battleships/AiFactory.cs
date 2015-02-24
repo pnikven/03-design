@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace battleships
+﻿namespace battleships
 {
 	public interface IAiFactory
 	{
@@ -14,9 +8,9 @@ namespace battleships
 	class AiFactory : IAiFactory
 	{
 		private readonly string aiExePath;
-		private readonly ProcessMonitor processMonitor;
+		private readonly IProcessMonitor processMonitor;
 
-		public AiFactory(string aiExePath, ProcessMonitor processMonitor)
+		public AiFactory(string aiExePath, IProcessMonitor processMonitor)
 		{
 			this.aiExePath = aiExePath;
 			this.processMonitor = processMonitor;

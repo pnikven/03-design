@@ -5,17 +5,22 @@ using NLog;
 
 namespace battleships
 {
-	public class AiTester
+	public interface IAiTester
+	{
+		void TestSingleFile();
+	}
+
+	public class AiTester : IAiTester
 	{
 		private readonly Logger resultsLog;
 		private readonly Settings settings;
-		private readonly MapGenerator mapGenerator;
-		private readonly GameVisualizer gameVisualizer;
+		private readonly IMapGenerator mapGenerator;
+		private readonly IGameVisualizer gameVisualizer;
 		private readonly IAiFactory aiFactory;
 		private readonly IGameFactory gameFactory;
 
-		public AiTester(Settings settings, ILoggerFactory loggerFactory, MapGenerator mapGenerator, 
-			GameVisualizer gameVisualizer, IAiFactory aiFactory, IGameFactory gameFactory)
+		public AiTester(Settings settings, ILoggerFactory loggerFactory, IMapGenerator mapGenerator,
+			IGameVisualizer gameVisualizer, IAiFactory aiFactory, IGameFactory gameFactory)
 		{
 			this.settings = settings;
 			resultsLog = loggerFactory.CreateLogger();
