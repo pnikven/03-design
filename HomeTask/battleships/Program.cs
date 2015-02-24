@@ -40,7 +40,7 @@ namespace battleships
 			standardKernel.Bind<IGameFactory>().To<GameFactory>();
 			standardKernel.Bind<IAiTester>().To<AiTester>();
 
-			standardKernel.Get<IAiTester>().TestSingleFile();
+			standardKernel.Get<IAiTester>().TestAi();
 		}
 	}
 }

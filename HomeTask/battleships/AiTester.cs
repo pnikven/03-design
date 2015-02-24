@@ -7,7 +7,7 @@ namespace battleships
 {
 	public interface IAiTester
 	{
-		void TestSingleFile();
+		void TestAi();
 	}
 
 	public class AiTester : IAiTester
@@ -30,7 +30,7 @@ namespace battleships
 			this.gameFactory = gameFactory;
 		}
 
-		public void TestSingleFile()
+		public void TestAi()
 		{            			
 			var badShots = 0;
 			var crashes = 0;
@@ -73,7 +73,14 @@ namespace battleships
 					gameVisualizer.Visualize(game);
 					if (game.AiCrashed)
 						Console.WriteLine(game.LastError.Message);
-					Console.ReadKey();
+					try
+					{
+						Console.ReadKey();
+					}
+					catch
+					{
+						// при тестировании консоли не существует и здесь будет возникать исключение
+					}
 				}
 			}
 		}
