@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using NLog;
 
@@ -10,15 +9,15 @@ namespace battleships
 	{
 		private static readonly Logger resultsLog = LogManager.GetLogger("results");
 		private readonly Settings settings;
-		private readonly IProcessMonitor processMonitor;
+		private readonly IAiFactory aiFactory;
 
-		public AiTester(Settings settings, IProcessMonitor processMonitor)
+		public AiTester(Settings settings, IAiFactory aiFactory)
 		{
 			this.settings = settings;
-			this.processMonitor = processMonitor;
+			this.aiFactory = aiFactory;
 		}
 
-		public void TestSingleFile(string exe)
+		public void TestAi(string exe)
 		{
 			var gen = new MapGenerator(settings, new Random(settings.RandomSeed));
 			var vis = new GameVisualizer();		
@@ -26,7 +25,7 @@ namespace battleships
 			var crashes = 0;
 			var gamesPlayed = 0;
 			var shots = new List<int>();
-			var ai = CreateAiAndBindProcessCreatedEvent(exe);
+			var ai = aiFactory.CreateAi();
 			for (var gameIndex = 0; gameIndex < settings.GamesCount; gameIndex++)
 			{
 				var map = gen.GenerateMap();
@@ -38,7 +37,7 @@ namespace battleships
 				{
 					crashes++;
 					if (crashes > settings.CrashLimit) break;
-					ai = CreateAiAndBindProcessCreatedEvent(exe);
+					ai = aiFactory.CreateAi();
 				}
 				else
 					shots.Add(game.TurnsCount);
@@ -51,18 +50,6 @@ namespace battleships
 			}
 			ai.Dispose();
 			WriteTotal(ai, shots, crashes, badShots, gamesPlayed);
-		}
-
-		private Ai CreateAiAndBindProcessCreatedEvent(string exe)
-		{
-			var ai = new Ai(exe);
-			ai.ProcessCreated += ai_ProcessCreated;
-			return ai;
-		}
-
-		private void ai_ProcessCreated(Process p)
-		{
-			processMonitor.Register(p);
 		}
 
 		private void RunGameToEnd(Game game, GameVisualizer vis)
