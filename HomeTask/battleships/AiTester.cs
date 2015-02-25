@@ -17,18 +17,17 @@ namespace battleships
 			this.gameFactory = gameFactory;
 		}
 
-		public void TestAi(string exe)
+		public void TestAi(string exe, IEnumerable<Map> gameMaps)
 		{
-			var gen = new MapGenerator(settings, new Random(settings.RandomSeed));
 			var vis = new GameVisualizer();
 			var badShots = 0;
 			var crashes = 0;
 			var gamesPlayed = 0;
 			var shots = new List<int>();
 			var ai = aiFactory.CreateAi();
-			for (var gameIndex = 0; gameIndex < settings.GamesCount; gameIndex++)
-			{
-				var map = gen.GenerateMap();
+			var gameIndex = 0;
+			foreach (var map in gameMaps)
+			{				
 				var game = gameFactory.CreateGame(map, ai);
 				RunGameToEnd(game, vis);
 				gamesPlayed++;
@@ -47,6 +46,7 @@ namespace battleships
 						"Game #{3,4}: Turns {0,4}, BadShots {1}{2}",
 						game.TurnsCount, game.BadShots, game.AiCrashed ? ", Crashed" : "", gameIndex);
 				}
+				gameIndex++;
 			}
 			ai.Dispose();
 			WriteTotal(ai, shots, crashes, badShots, gamesPlayed);

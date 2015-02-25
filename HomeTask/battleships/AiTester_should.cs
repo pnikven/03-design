@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using NUnit.Framework;
 using FakeItEasy;
 using NLog;
@@ -12,6 +14,7 @@ namespace battleships
 		private Settings settings;
 		private Logger logger;
 		private IGameFactory gameFactory;
+		private IEnumerable<Map> gameMaps;
 
 		[SetUp]
 		public void Setup()
@@ -27,6 +30,8 @@ namespace battleships
 			};
 			logger = A.Fake<Logger>();
 			gameFactory = new GameFactory(logger);
+			var mapGenerator = new MapGenerator(settings, new Random(settings.RandomSeed));
+			gameMaps = Enumerable.Range(0, settings.GamesCount).Select(x => mapGenerator.GenerateMap());
 		}
 
 		[Test]
@@ -36,7 +41,7 @@ namespace battleships
 			var aiFactory = new AiFactory(A.Dummy<string>(), processMonitor, logger);
 			var aiTester = new AiTester(settings, aiFactory, gameFactory);
 
-			aiTester.TestAi(A.Dummy<string>());
+			aiTester.TestAi(A.Dummy<string>(), gameMaps);
 
 			A.CallTo(() => processMonitor.Register(A<Process>.Ignored))
 				.MustHaveHappened(Repeated.Exactly.Times(settings.GamesCount));
@@ -48,7 +53,7 @@ namespace battleships
 			var aiFactory = A.Fake<IAiFactory>();
 			var aiTester = new AiTester(settings, aiFactory, gameFactory);
 
-			aiTester.TestAi(A.Dummy<string>());
+			aiTester.TestAi(A.Dummy<string>(), gameMaps);
 
 			A.CallTo(() => aiFactory.CreateAi())
 				.MustHaveHappened(Repeated.Exactly.Times(settings.GamesCount + 1));

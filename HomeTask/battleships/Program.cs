@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using NLog;
 
@@ -20,6 +22,12 @@ namespace battleships
 				return;
 			}
 			var aiPath = args[0];
+			if (!File.Exists(aiPath))
+			{
+				Console.WriteLine("No AI exe-file " + aiPath);
+				return;
+			}
+
 			var settings = new Settings("settings.txt");
 			var processMonitor = new ProcessMonitor(
 				TimeSpan.FromSeconds(settings.TimeLimitSeconds * settings.GamesCount), settings.MemoryLimit);
@@ -28,10 +36,9 @@ namespace battleships
 			var gameFactory = new GameFactory(Logger);
 			var tester = new AiTester(settings, aiFactory, gameFactory);
 			tester.LogMessageHandler += logEventInfo => LogManager.GetLogger(settings.ResultsLoggerName).Log(logEventInfo);
-			if (File.Exists(aiPath))
-				tester.TestAi(aiPath);
-			else
-				Console.WriteLine("No AI exe-file " + aiPath);
+			var mapGenerator = new MapGenerator(settings, new Random(settings.RandomSeed));
+			var gameMaps = Enumerable.Range(0, settings.GamesCount).Select(x => mapGenerator.GenerateMap());
+			tester.TestAi(aiPath, gameMaps);
 		}
 	}
 }

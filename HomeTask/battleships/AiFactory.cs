@@ -22,8 +22,8 @@ namespace battleships
 		}
 
 		public Ai CreateAi()
-		{
-			var ai = new Ai(aiExePath);
+		{			
+			var ai = new Ai(aiExePath);			
 			ai.ProcessCreatedHandler += ai_ProcessCreated;
 			ai.LogMessageHandler += ai_LogMessage;
 			return ai;
