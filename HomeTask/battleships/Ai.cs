@@ -2,15 +2,13 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using NLog;
 
 namespace battleships
 {
-	public class Ai
+	public class Ai : Loggable
 	{
-		public event Action<Process> ProcessCreated;
+		public event Action<Process> ProcessCreatedHandler;
 
-		private static readonly Logger log = LogManager.GetCurrentClassLogger();
 		private Process process;
 		private readonly string exePath;
 
@@ -41,16 +39,16 @@ namespace battleships
 		{
 			var message = string.Format(messageFormat, args);
 			process.StandardInput.WriteLine(message);
-			log.Debug("SEND: " + message);
+			Log(LogMessageType.Debug, "SEND: " + message);
 		}
 
 		public void Dispose()
 		{
 			if (process == null || process.HasExited) return;
-			log.Debug("CLOSE");
+			Log(LogMessageType.Debug, "CLOSE");
 			process.StandardInput.Close();
 			if (!process.WaitForExit(500))
-				log.Info("Not terminated {0}", process.ProcessName);
+				Log(LogMessageType.Info, string.Format("Not terminated {0}", process.ProcessName));
 			try
 			{
 				process.Kill();
@@ -74,10 +72,10 @@ namespace battleships
 				CreateNoWindow = true,
 				WindowStyle = ProcessWindowStyle.Hidden
 			};
-			var aiProcess = new Process {StartInfo = startInfo};
-			if (ProcessCreated != null)
+			var aiProcess = new Process { StartInfo = startInfo };
+			if (ProcessCreatedHandler != null)
 			{
-				ProcessCreated(aiProcess);
+				ProcessCreatedHandler(aiProcess);
 			}
 			aiProcess.Start();
 			return aiProcess;
@@ -86,12 +84,12 @@ namespace battleships
 		private Vector ReceiveNextShot()
 		{
 			var output = process.StandardOutput.ReadLine();
-			log.Debug("RECEIVE " + output);
+			Log(LogMessageType.Debug, "RECEIVE " + output);
 			if (output == null)
 			{
 				var err = process.StandardError.ReadToEnd();
 				Console.WriteLine(err);
-				log.Info(err);
+				Log(LogMessageType.Info, err);
 				throw new Exception("No ai output");
 			}
 			try

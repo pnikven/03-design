@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using NLog;
 
 namespace battleships
 {
@@ -10,9 +9,8 @@ namespace battleships
 		public Vector Target;
 	}
 
-	public class Game
+	public class Game : Loggable
 	{
-		private static readonly Logger log = LogManager.GetCurrentClassLogger();
 		private readonly Ai ai;
 
 		public Game(Map map, Ai ai)
@@ -43,7 +41,7 @@ namespace battleships
 			if (!UpdateLastTarget()) return;
 			if (IsBadShot(LastTarget)) BadShots++;
 			var hit = Map.Badaboom(LastTarget);
-			LastShotInfo = new ShotInfo {Target = LastTarget, Hit = hit};
+			LastShotInfo = new ShotInfo { Target = LastTarget, Hit = hit };
 			if (hit == ShtEffct.Miss)
 				TurnsCount++;
 		}
@@ -60,8 +58,8 @@ namespace battleships
 			catch (Exception e)
 			{
 				AiCrashed = true;
-				log.Info("Ai {0} crashed", ai.Name);
-				log.Error(e);
+				Log(LogMessageType.Info, string.Format("Ai {0} crashed", ai.Name));
+				Log(LogMessageType.Error, e.ToString());
 				LastError = e;
 				return false;
 			}

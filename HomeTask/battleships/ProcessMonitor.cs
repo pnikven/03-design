@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using NLog;
 
 namespace battleships
 {
@@ -12,9 +11,8 @@ namespace battleships
 		void Register(Process process);
 	}
 
-	public class ProcessMonitor : IProcessMonitor
+	public class ProcessMonitor : Loggable, IProcessMonitor
 	{
-		private static readonly Logger log = LogManager.GetCurrentClassLogger();
 		private readonly object locker = new object();
 		private readonly long memoryLimit;
 		private readonly List<Process> processes = new List<Process>();
@@ -68,7 +66,7 @@ namespace battleships
 		private void CheckParameter<T>(T param, T limit, Process process, string message) where T : IComparable<T>
 		{
 			if (param.CompareTo(limit) <= 0) return;
-			log.Error(message + " {0}: {1}", process.ProcessName, param);
+			Log(LogMessageType.Error, string.Format(message + " {0}: {1}", process.ProcessName, param));
 			process.Kill();
 			processes.Remove(process);
 		}

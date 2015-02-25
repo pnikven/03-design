@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using NUnit.Framework;
 using FakeItEasy;
+using NLog;
 
 namespace battleships
 {
@@ -9,6 +10,8 @@ namespace battleships
 	class AiTester_should
 	{
 		private Settings settings;
+		private Logger logger;
+		private IGameFactory gameFactory;
 
 		[SetUp]
 		public void Setup()
@@ -22,14 +25,16 @@ namespace battleships
 				Width = 1,
 				Height = 1
 			};
+			logger = A.Fake<Logger>();
+			gameFactory = new GameFactory(logger);
 		}
 
 		[Test]
 		public void register_process_for_each_ai()
 		{
 			var processMonitor = A.Fake<IProcessMonitor>();
-			var aiFactory = new AiFactory(A.Dummy<string>(), processMonitor);
-			var aiTester = new AiTester(settings, aiFactory);
+			var aiFactory = new AiFactory(A.Dummy<string>(), processMonitor, logger);
+			var aiTester = new AiTester(settings, aiFactory, gameFactory);
 
 			aiTester.TestAi(A.Dummy<string>());
 
@@ -41,7 +46,7 @@ namespace battleships
 		public void restart_ai_by_recreating_it_with_aiFactory()
 		{
 			var aiFactory = A.Fake<IAiFactory>();
-			var aiTester = new AiTester(settings, aiFactory);
+			var aiTester = new AiTester(settings, aiFactory, gameFactory);
 
 			aiTester.TestAi(A.Dummy<string>());
 

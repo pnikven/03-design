@@ -1,26 +1,26 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using NLog;
 
 namespace battleships
 {
-	public class AiTester
+	public class AiTester : Loggable
 	{
-		private static readonly Logger resultsLog = LogManager.GetLogger("results");
 		private readonly Settings settings;
 		private readonly IAiFactory aiFactory;
+		private readonly IGameFactory gameFactory;
 
-		public AiTester(Settings settings, IAiFactory aiFactory)
+		public AiTester(Settings settings, IAiFactory aiFactory, IGameFactory gameFactory)
 		{
 			this.settings = settings;
 			this.aiFactory = aiFactory;
+			this.gameFactory = gameFactory;
 		}
 
 		public void TestAi(string exe)
 		{
 			var gen = new MapGenerator(settings, new Random(settings.RandomSeed));
-			var vis = new GameVisualizer();		
+			var vis = new GameVisualizer();
 			var badShots = 0;
 			var crashes = 0;
 			var gamesPlayed = 0;
@@ -29,7 +29,7 @@ namespace battleships
 			for (var gameIndex = 0; gameIndex < settings.GamesCount; gameIndex++)
 			{
 				var map = gen.GenerateMap();
-				var game = new Game(map, ai);
+				var game = gameFactory.CreateGame(map, ai);
 				RunGameToEnd(game, vis);
 				gamesPlayed++;
 				badShots += game.BadShots;
@@ -80,7 +80,7 @@ namespace battleships
 			var score = efficiencyScore - crashPenalty - badFraction;
 			var headers = FormatTableRow(new object[] { "AiName", "Mean", "Sigma", "Median", "Crashes", "Bad%", "Games", "Score" });
 			var message = FormatTableRow(new object[] { ai.Name, mean, sigma, median, crashes, badFraction, gamesPlayed, score });
-			resultsLog.Info(message);
+			Log(LogMessageType.Info, message, settings.ResultsLoggerName);
 			Console.WriteLine();
 			Console.WriteLine("Score statistics");
 			Console.WriteLine("================");
@@ -90,7 +90,7 @@ namespace battleships
 
 		private string FormatTableRow(object[] values)
 		{
-			return FormatValue(values[0], 15) 
+			return FormatValue(values[0], 15)
 				+ string.Join(" ", values.Skip(1).Select(v => FormatValue(v, 7)));
 		}
 

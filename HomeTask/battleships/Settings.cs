@@ -17,6 +17,7 @@ namespace battleships
 		public int TimeLimitSeconds;
 		public bool Verbose;
 		public int Width;
+		public string ResultsLoggerName;
 
 		public Settings()
 		{
@@ -38,6 +39,7 @@ namespace battleships
 			TimeLimitSeconds = GetInt(lines, "timelimitSeconds", 60);
 			MemoryLimit = GetInt(lines, "memoryLimit", 500*1024*1024);
 			CrashLimit = GetInt(lines, "crashlimit", 1);
+			ResultsLoggerName = Get(lines, "resultsLoggerName").First();
 		}
 
 		private IEnumerable<string> Get(IEnumerable<string[]> lines, string key)
