@@ -8,7 +8,7 @@ namespace battleships
 {
 	public class Ai
 	{
-		public event Action<Process> ProcessStarted;
+		public event Action<Process> ProcessCreated;
 
 		private static readonly Logger log = LogManager.GetCurrentClassLogger();
 		private Process process;
@@ -75,9 +75,9 @@ namespace battleships
 				WindowStyle = ProcessWindowStyle.Hidden
 			};
 			var aiProcess = new Process {StartInfo = startInfo};
-			if (ProcessStarted != null)
+			if (ProcessCreated != null)
 			{
-				ProcessStarted(aiProcess);
+				ProcessCreated(aiProcess);
 			}
 			aiProcess.Start();
 			return aiProcess;

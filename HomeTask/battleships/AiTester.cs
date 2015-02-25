@@ -26,7 +26,7 @@ namespace battleships
 			var crashes = 0;
 			var gamesPlayed = 0;
 			var shots = new List<int>();
-			var ai = CreateAiAndBindProcessStartedEvent(exe);
+			var ai = CreateAiAndBindProcessCreatedEvent(exe);
 			for (var gameIndex = 0; gameIndex < settings.GamesCount; gameIndex++)
 			{
 				var map = gen.GenerateMap();
@@ -38,7 +38,7 @@ namespace battleships
 				{
 					crashes++;
 					if (crashes > settings.CrashLimit) break;
-					ai = CreateAiAndBindProcessStartedEvent(exe);
+					ai = CreateAiAndBindProcessCreatedEvent(exe);
 				}
 				else
 					shots.Add(game.TurnsCount);
@@ -53,14 +53,14 @@ namespace battleships
 			WriteTotal(ai, shots, crashes, badShots, gamesPlayed);
 		}
 
-		private Ai CreateAiAndBindProcessStartedEvent(string exe)
+		private Ai CreateAiAndBindProcessCreatedEvent(string exe)
 		{
 			var ai = new Ai(exe);
-			ai.ProcessStarted += ai_ProcessStarted;
+			ai.ProcessCreated += ai_ProcessCreated;
 			return ai;
 		}
 
-		private void ai_ProcessStarted(Process p)
+		private void ai_ProcessCreated(Process p)
 		{
 			processMonitor.Register(p);
 		}
