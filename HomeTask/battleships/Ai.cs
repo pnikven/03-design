@@ -8,15 +8,15 @@ namespace battleships
 {
 	public class Ai
 	{
+		public event Action<Process> ProcessStarted;
+
 		private static readonly Logger log = LogManager.GetCurrentClassLogger();
 		private Process process;
 		private readonly string exePath;
-		private readonly ProcessMonitor monitor;
 
-		public Ai(string exePath, ProcessMonitor monitor)
+		public Ai(string exePath)
 		{
 			this.exePath = exePath;
-			this.monitor = monitor;
 		}
 
 		public string Name
@@ -74,8 +74,12 @@ namespace battleships
 				CreateNoWindow = true,
 				WindowStyle = ProcessWindowStyle.Hidden
 			};
-			var aiProcess = Process.Start(startInfo);
-			monitor.Register(aiProcess);
+			var aiProcess = new Process {StartInfo = startInfo};
+			if (ProcessStarted != null)
+			{
+				ProcessStarted(aiProcess);
+			}
+			aiProcess.Start();
 			return aiProcess;
 		}
 

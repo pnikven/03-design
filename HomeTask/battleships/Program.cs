@@ -18,7 +18,8 @@ namespace battleships
 			}
 			var aiPath = args[0];
 			var settings = new Settings("settings.txt");
-			var tester = new AiTester(settings);
+			var tester = new AiTester(settings, new ProcessMonitor(
+				TimeSpan.FromSeconds(settings.TimeLimitSeconds * settings.GamesCount), settings.MemoryLimit));
 			if (File.Exists(aiPath))
 				tester.TestSingleFile(aiPath);
 			else
