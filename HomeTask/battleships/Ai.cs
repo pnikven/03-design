@@ -22,12 +22,20 @@ namespace battleships
 			get { return Path.GetFileNameWithoutExtension(exePath); }
 		}
 
+		public void ClearProcess()
+		{
+			if (ProcessIsActive)
+				process = null;
+		}
+
 		public Vector Init(int width, int height, int[] shipSizes)
 		{
-			if (process == null || process.HasExited) process = RunProcess();
+			if (!ProcessIsActive) process = RunProcess();
 			SendMessage("Init {0} {1} {2}", width, height, string.Join(" ", shipSizes));
 			return ReceiveNextShot();
 		}
+
+		private bool ProcessIsActive { get { return process != null && !process.HasExited; } }
 
 		public Vector GetNextShot(Vector lastShotTarget, ShtEffct lastShot)
 		{

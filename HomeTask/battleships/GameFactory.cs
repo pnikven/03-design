@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using System;
+using NLog;
 
 namespace battleships
 {
@@ -25,14 +26,8 @@ namespace battleships
 
 		void game_LogMessageHandler(LogEventInfo info)
 		{
-			try
-			{
-				logger.Log(info);
-			}
-			catch
-			{
-			}
-
+			if (logger == null) return;
+			logger.Log(info);
 		}
 	}
 }

@@ -7,28 +7,22 @@ namespace battleships
 	public class AiTester : Loggable
 	{
 		private readonly Settings settings;
-		private readonly IAiFactory aiFactory;
-		private readonly IGameFactory gameFactory;
 
-		public AiTester(Settings settings, IAiFactory aiFactory, IGameFactory gameFactory)
+		public AiTester(Settings settings)
 		{
 			this.settings = settings;
-			this.aiFactory = aiFactory;
-			this.gameFactory = gameFactory;
 		}
 
-		public void TestAi(string exe, IEnumerable<Map> gameMaps)
+		public void TestAi(Ai ai, IEnumerable<Game> games)
 		{
 			var vis = new GameVisualizer();
 			var badShots = 0;
 			var crashes = 0;
 			var gamesPlayed = 0;
 			var shots = new List<int>();
-			var ai = aiFactory.CreateAi();
 			var gameIndex = 0;
-			foreach (var map in gameMaps)
+			foreach (var game in games)
 			{				
-				var game = gameFactory.CreateGame(map, ai);
 				RunGameToEnd(game, vis);
 				gamesPlayed++;
 				badShots += game.BadShots;
@@ -36,7 +30,7 @@ namespace battleships
 				{
 					crashes++;
 					if (crashes > settings.CrashLimit) break;
-					ai = aiFactory.CreateAi();
+					ai.ClearProcess();
 				}
 				else
 					shots.Add(game.TurnsCount);

@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using NLog;
 
 namespace battleships
@@ -36,6 +37,7 @@ namespace battleships
 
 		void ai_LogMessage(LogEventInfo loggEventInfo)
 		{
+			if (logger == null) return;
 			logger.Log(loggEventInfo);
 		}
 	}

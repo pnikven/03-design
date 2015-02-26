@@ -32,13 +32,15 @@ namespace battleships
 			var processMonitor = new ProcessMonitor(
 				TimeSpan.FromSeconds(settings.TimeLimitSeconds * settings.GamesCount), settings.MemoryLimit);
 			processMonitor.LogMessageHandler += logEventInfo => Logger.Log(logEventInfo);
-			var aiFactory = new AiFactory(aiPath, processMonitor, Logger);
-			var gameFactory = new GameFactory(Logger);
-			var tester = new AiTester(settings, aiFactory, gameFactory);
-			tester.LogMessageHandler += logEventInfo => LogManager.GetLogger(settings.ResultsLoggerName).Log(logEventInfo);
 			var mapGenerator = new MapGenerator(settings, new Random(settings.RandomSeed));
 			var gameMaps = Enumerable.Range(0, settings.GamesCount).Select(x => mapGenerator.GenerateMap());
-			tester.TestAi(aiPath, gameMaps);
+			var aiFactory = new AiFactory(aiPath, processMonitor, Logger);
+			var ai = aiFactory.CreateAi();
+			var gameFactory = new GameFactory(Logger);
+			var games = gameMaps.Select(map => gameFactory.CreateGame(map, ai));
+			var tester = new AiTester(settings);
+			tester.LogMessageHandler += logEventInfo => LogManager.GetLogger(settings.ResultsLoggerName).Log(logEventInfo);
+			tester.TestAi(ai, games);
 		}
 	}
 }
