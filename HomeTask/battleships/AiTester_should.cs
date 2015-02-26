@@ -12,6 +12,13 @@ namespace battleships
 	{
 		private Settings settings;
 		private IEnumerable<Map> gameMaps;
+		private IProcessMonitor processMonitor;
+		private AiFactory aiFactory;
+		private Ai ai;
+		private IGameFactory gameFactory;
+		private IEnumerable<Game> games;
+		private AiTester aiTester;
+		private IGameVisualizer gameVisualizer;
 
 		[SetUp]
 		public void Setup()
@@ -26,34 +33,36 @@ namespace battleships
 				Height = 1
 			};
 			var mapGenerator = new MapGenerator(settings, new Random(settings.RandomSeed));
-			gameMaps = Enumerable.Range(0, settings.GamesCount).Select(x => mapGenerator.GenerateMap());			
+			gameMaps = Enumerable.Range(0, settings.GamesCount).Select(x => mapGenerator.GenerateMap());
+			processMonitor = A.Fake<IProcessMonitor>();
+			aiFactory = new AiFactory(A.Dummy<string>(), processMonitor, null);
+			ai = aiFactory.CreateAi();
+			gameFactory = new GameFactory(null);
+			games = gameMaps.Select(map => gameFactory.CreateGame(map, ai));
+			gameVisualizer = A.Fake<IGameVisualizer>();
+			aiTester = new AiTester(settings);
 		}
 
 		[Test]
 		public void register_process_for_each_ai()
 		{
-			var processMonitor = A.Fake<IProcessMonitor>();
-			var aiFactory = new AiFactory(A.Dummy<string>(), processMonitor, null);
-			var ai = aiFactory.CreateAi();
-			var gameFactory = new GameFactory(null);
-			var games = gameMaps.Select(map => gameFactory.CreateGame(map, ai));
-			var aiTester = new AiTester(settings);
-
 			aiTester.TestAi(ai, games);
 
 			A.CallTo(() => processMonitor.Register(A<Process>.Ignored))
 				.MustHaveHappened(Repeated.Exactly.Times(settings.GamesCount));
 		}
 
-		//[Test]
-		//public void restart_ai_by_recreating_it_with_aiFactory()
-		//{
-		//	var aiFactory = A.Fake<IAiFactory>();
+		[Test]
+		public void visualize_game_in_interactive_mode()
+		{
+			settings.Interactive = true;
+			aiTester = new AiTester(settings);
+			aiTester.VisualizeGameHandler += game => gameVisualizer.Visualize(game);
 
-		//	aiTester.TestAi(ai, games);
+			aiTester.TestAi(ai, games);
 
-		//	A.CallTo(() => aiFactory.CreateAi())
-		//		.MustHaveHappened(Repeated.Exactly.Times(settings.GamesCount + 1));
-		//}
+			A.CallTo(() => gameVisualizer.Visualize(A<Game>.Ignored))
+				.MustHaveHappened(Repeated.Exactly.Times(settings.GamesCount));
+		}
 	}
 }

@@ -6,6 +6,8 @@ namespace battleships
 {
 	public class AiTester : Loggable
 	{
+		public event Action<Game> VisualizeGameHandler;
+
 		private readonly Settings settings;
 
 		public AiTester(Settings settings)
@@ -15,7 +17,6 @@ namespace battleships
 
 		public void TestAi(Ai ai, IEnumerable<Game> games)
 		{
-			var vis = new GameVisualizer();
 			var badShots = 0;
 			var crashes = 0;
 			var gamesPlayed = 0;
@@ -23,7 +24,7 @@ namespace battleships
 			var gameIndex = 0;
 			foreach (var game in games)
 			{				
-				RunGameToEnd(game, vis);
+				RunGameToEnd(game);
 				gamesPlayed++;
 				badShots += game.BadShots;
 				if (game.AiCrashed)
@@ -46,17 +47,25 @@ namespace battleships
 			WriteTotal(ai, shots, crashes, badShots, gamesPlayed);
 		}
 
-		private void RunGameToEnd(Game game, GameVisualizer vis)
+		private void RunGameToEnd(Game game)
 		{
 			while (!game.IsOver())
 			{
 				game.MakeStep();
 				if (settings.Interactive)
 				{
-					vis.Visualize(game);
+					if (VisualizeGameHandler !=null)
+						VisualizeGameHandler(game);
 					if (game.AiCrashed)
 						Console.WriteLine(game.LastError.Message);
-					Console.ReadKey();
+					try
+					{
+						Console.ReadKey();
+					}
+					catch (InvalidOperationException e)
+					{
+						Log(LogMessageType.Error, e.ToString());
+					}					
 				}
 			}
 		}

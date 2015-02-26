@@ -39,6 +39,8 @@ namespace battleships
 			var gameFactory = new GameFactory(Logger);
 			var games = gameMaps.Select(map => gameFactory.CreateGame(map, ai));
 			var tester = new AiTester(settings);
+			var gameVisualizer = new GameVisualizer();
+			tester.VisualizeGameHandler += game => gameVisualizer.Visualize(game);
 			tester.LogMessageHandler += logEventInfo => LogManager.GetLogger(settings.ResultsLoggerName).Log(logEventInfo);
 			tester.TestAi(ai, games);
 		}
