@@ -56,6 +56,7 @@
     <Compile Include="AiTester_should.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="GameFactory.cs" />
+    <Compile Include="GameStatistics.cs" />
     <Compile Include="GameVisualizer.cs" />
     <Compile Include="Loggable.cs" />
     <Compile Include="LogMessageType.cs" />
@@ -67,6 +68,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="AiTester.cs" />
+    <Compile Include="SummaryGameStatisticsCalculator.cs" />
     <Compile Include="Vector.cs" />
   </ItemGroup>
   <ItemGroup>

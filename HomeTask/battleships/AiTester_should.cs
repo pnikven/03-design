@@ -19,6 +19,7 @@ namespace battleships
 		private IEnumerable<Game> games;
 		private AiTester aiTester;
 		private IGameVisualizer gameVisualizer;
+		private SummaryGameStatisticsCalculator summaryGameStatisticsCalculator;
 
 		[SetUp]
 		public void Setup()
@@ -41,12 +42,13 @@ namespace battleships
 			games = gameMaps.Select(map => gameFactory.CreateGame(map, ai));
 			gameVisualizer = A.Fake<IGameVisualizer>();
 			aiTester = new AiTester(settings);
+			summaryGameStatisticsCalculator = new SummaryGameStatisticsCalculator(settings);
 		}
 
 		[Test]
-		public void register_process_for_each_ai()
+		public void register_each_created_process_for_ai()
 		{
-			aiTester.TestAi(ai, games);
+			TestAiOnGames();
 
 			A.CallTo(() => processMonitor.Register(A<Process>.Ignored))
 				.MustHaveHappened(Repeated.Exactly.Times(settings.GamesCount));
@@ -59,10 +61,15 @@ namespace battleships
 			aiTester = new AiTester(settings);
 			aiTester.VisualizeGameHandler += game => gameVisualizer.Visualize(game);
 
-			aiTester.TestAi(ai, games);
+			TestAiOnGames();
 
 			A.CallTo(() => gameVisualizer.Visualize(A<Game>.Ignored))
 				.MustHaveHappened(Repeated.Exactly.Times(settings.GamesCount));
+		}
+
+		private void TestAiOnGames()
+		{
+			summaryGameStatisticsCalculator.PrintSummaryGameStatistics(ai.Name, aiTester.TestAi(ai, games));
 		}
 	}
 }

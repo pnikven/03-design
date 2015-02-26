@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -11,7 +11,7 @@ namespace battleships
 {
 	public class Program
 	{
-		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();		
 
 		private static void Main(string[] args)
 		{
@@ -29,6 +29,7 @@ namespace battleships
 			}
 
 			var settings = new Settings("settings.txt");
+			var resultsLogger = LogManager.GetLogger(settings.ResultsLoggerName);
 			var processMonitor = new ProcessMonitor(
 				TimeSpan.FromSeconds(settings.TimeLimitSeconds * settings.GamesCount), settings.MemoryLimit);
 			processMonitor.LogMessageHandler += logEventInfo => Logger.Log(logEventInfo);
@@ -38,11 +39,15 @@ namespace battleships
 			var ai = aiFactory.CreateAi();
 			var gameFactory = new GameFactory(Logger);
 			var games = gameMaps.Select(map => gameFactory.CreateGame(map, ai));
-			var tester = new AiTester(settings);
+			var aiTester = new AiTester(settings);
 			var gameVisualizer = new GameVisualizer();
-			tester.VisualizeGameHandler += game => gameVisualizer.Visualize(game);
-			tester.LogMessageHandler += logEventInfo => LogManager.GetLogger(settings.ResultsLoggerName).Log(logEventInfo);
-			tester.TestAi(ai, games);
+			aiTester.VisualizeGameHandler += game => gameVisualizer.Visualize(game);
+			aiTester.LogMessageHandler += logEventInfo => resultsLogger.Log(logEventInfo);
+			IEnumerable<GameStatistics> gameStatistics = aiTester.TestAi(ai, games);
+			var summaryGameStatisticsCalculator = new SummaryGameStatisticsCalculator(settings);
+			summaryGameStatisticsCalculator.LogMessageHandler += logEventInfo => resultsLogger.Log(logEventInfo);
+			summaryGameStatisticsCalculator.PrintSummaryGameStatistics(ai.Name, gameStatistics);
+			ai.Dispose();
 		}
 	}
 }
