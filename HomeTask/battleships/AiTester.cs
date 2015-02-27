@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using NLog;
 
@@ -18,9 +19,12 @@ namespace battleships
 		private readonly IGameVisualizer gameVisualizer;
 		private readonly IAiFactory aiFactory;
 		private readonly IGameFactory gameFactory;
+		private readonly TextWriter textWriter;
+		private readonly TextReader textReader;
 
 		public AiTester(Settings settings, ILoggerFactory loggerFactory, IMapGenerator mapGenerator,
-			IGameVisualizer gameVisualizer, IAiFactory aiFactory, IGameFactory gameFactory)
+			IGameVisualizer gameVisualizer, IAiFactory aiFactory, IGameFactory gameFactory, 
+			TextWriter textWriter, TextReader textReader)
 		{
 			this.settings = settings;
 			resultsLog = loggerFactory.CreateLogger();
@@ -28,6 +32,8 @@ namespace battleships
 			this.gameVisualizer = gameVisualizer;
 			this.aiFactory = aiFactory;
 			this.gameFactory = gameFactory;
+			this.textWriter = textWriter;
+			this.textReader = textReader;
 		}
 
 		public void TestAi()
@@ -54,7 +60,7 @@ namespace battleships
 					shots.Add(game.TurnsCount);
 				if (settings.Verbose)
 				{
-					Console.WriteLine(
+					textWriter.WriteLine(
 						"Game #{3,4}: Turns {0,4}, BadShots {1}{2}",
 						game.TurnsCount, game.BadShots, game.AiCrashed ? ", Crashed" : "", gameIndex);
 				}
@@ -72,15 +78,9 @@ namespace battleships
 				{
 					gameVisualizer.Visualize(game);
 					if (game.AiCrashed)
-						Console.WriteLine(game.LastError.Message);
-					try
-					{
-						Console.ReadKey();
-					}
-					catch
-					{
-						// при тестировании консоли не существует и здесь будет возникать исключение
-					}
+						textWriter.WriteLine(game.LastError.Message);
+					textWriter.Write("Press <Enter> to continue");
+					textReader.ReadLine();
 				}
 			}
 		}
@@ -99,11 +99,11 @@ namespace battleships
 			var headers = FormatTableRow(new object[] { "AiName", "Mean", "Sigma", "Median", "Crashes", "Bad%", "Games", "Score" });
 			var message = FormatTableRow(new object[] { ai.Name, mean, sigma, median, crashes, badFraction, gamesPlayed, score });
 			resultsLog.Info(message);
-			Console.WriteLine();
-			Console.WriteLine("Score statistics");
-			Console.WriteLine("================");
-			Console.WriteLine(headers);
-			Console.WriteLine(message);
+			textWriter.WriteLine();
+			textWriter.WriteLine("Score statistics");
+			textWriter.WriteLine("================");
+			textWriter.WriteLine(headers);
+			textWriter.WriteLine(message);
 		}
 
 		private string FormatTableRow(object[] values)

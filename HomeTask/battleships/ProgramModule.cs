@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Ninject;
 using Ninject.Modules;
 
@@ -15,7 +16,9 @@ namespace battleships
 
 		public override void Load()
 		{
-			Bind<Settings>().To<Settings>().InSingletonScope()
+			Bind<TextWriter>().ToConstant(Console.Out);
+			Bind<TextReader>().ToConstant(Console.In);
+			Bind<Settings>().ToSelf().InSingletonScope()
 				.WithConstructorArgument("settingsFilename", "settings.txt");
 			Bind<ILoggerFactory>().To<LoggerFactory>()
 				.WithConstructorArgument("loggerName", "results");
