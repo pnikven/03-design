@@ -6,6 +6,8 @@ namespace battleships
 	public abstract class Loggable
 	{
 		public event Action<LogEventInfo> LogMessageHandler;
+		public event Action<string> WriteLineHandler;
+		public event Func<string> ReadLineHandler;
 
 		protected void Log(LogMessageType logMessageType, string message, string loggerName = null)
 		{
@@ -15,6 +17,17 @@ namespace battleships
 				loggerName ?? GetType().FullName, 
 				message);
 			LogMessageHandler(logEventInfo);
+		}
+
+		protected void WriteLineToStdOut(string message)
+		{
+			if (WriteLineHandler == null) return;
+			WriteLineHandler(message);
+		}
+
+		protected string ReadLineFromStdIn()
+		{
+			return ReadLineHandler == null ? null : ReadLineHandler();
 		}
 
 		protected LogLevel MapLogMessageTypeToLogLevel(LogMessageType logMessageType)

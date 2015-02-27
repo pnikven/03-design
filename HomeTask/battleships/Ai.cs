@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace battleships
 {
-	public class Ai : Loggable
+	public class Ai : Loggable, IDisposable
 	{
 		public event Action<Process> ProcessCreatedHandler;
 
@@ -96,7 +96,7 @@ namespace battleships
 			if (output == null)
 			{
 				var err = process.StandardError.ReadToEnd();
-				Console.WriteLine(err);
+				WriteLineToStdOut(err);
 				Log(LogMessageType.Info, err);
 				throw new Exception("No ai output");
 			}

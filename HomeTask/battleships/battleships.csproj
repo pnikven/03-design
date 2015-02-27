@@ -62,6 +62,7 @@
     <Compile Include="LogMessageType.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="MapGenerator.cs" />
+    <Compile Include="MapGenerator_should.cs" />
     <Compile Include="Map_should.cs" />
     <Compile Include="ProcessMonitor.cs" />
     <Compile Include="Program.cs" />

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using FakeItEasy;
@@ -11,6 +12,8 @@ namespace battleships
 	class AiTester_should
 	{
 		private Settings settings;
+		private TextWriter textWriter;
+		private TextReader textReader;
 		private IEnumerable<Map> gameMaps;
 		private IProcessMonitor processMonitor;
 		private AiFactory aiFactory;
@@ -33,10 +36,13 @@ namespace battleships
 				Width = 1,
 				Height = 1
 			};
+			textWriter = A.Fake<TextWriter>();
+			textReader = A.Fake<TextReader>();
 			var mapGenerator = new MapGenerator(settings, new Random(settings.RandomSeed));
 			gameMaps = Enumerable.Range(0, settings.GamesCount).Select(x => mapGenerator.GenerateMap());
 			processMonitor = A.Fake<IProcessMonitor>();
-			aiFactory = new AiFactory(A.Dummy<string>(), processMonitor, null);
+
+			aiFactory = new AiFactory(A.Dummy<string>(), processMonitor, null, textWriter, textReader);
 			ai = aiFactory.CreateAi();
 			gameFactory = new GameFactory(null);
 			games = gameMaps.Select(map => gameFactory.CreateGame(map, ai));

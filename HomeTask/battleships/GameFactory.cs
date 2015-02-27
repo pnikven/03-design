@@ -1,5 +1,4 @@
-﻿using System;
-using NLog;
+﻿using NLog;
 
 namespace battleships
 {
@@ -20,14 +19,12 @@ namespace battleships
 		public Game CreateGame(Map map, Ai ai)
 		{
 			var game = new Game(map, ai);
-			game.LogMessageHandler += game_LogMessageHandler;
+			game.LogMessageHandler += info =>
+			{
+				if (logger == null) return;
+				logger.Log(info);
+			};
 			return game;
-		}
-
-		void game_LogMessageHandler(LogEventInfo info)
-		{
-			if (logger == null) return;
-			logger.Log(info);
 		}
 	}
 }

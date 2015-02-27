@@ -5,7 +5,7 @@ namespace battleships
 {
 	public class AiTester : Loggable
 	{
-		public event Action<Game> VisualizeGameHandler;
+		public event Action<Game> VisualizeGameHandler;		
 
 		private readonly Settings settings;
 
@@ -38,12 +38,12 @@ namespace battleships
 
 		private void PrintCurrentGameStatistics(int gameIndex, GameStatistics gameStatistics)
 		{
-			Console.WriteLine(
+			WriteLineToStdOut(string.Format(
 				"Game #{3,4}: Turns {0,4}, BadShots {1}{2}",
 				gameStatistics.TurnsCount,
 				gameStatistics.BadShots,
 				gameStatistics.AiCrashed ? ", Crashed" : "",
-				gameIndex);
+				gameIndex));
 		}
 
 		private void RunGameToEnd(Game game)
@@ -56,15 +56,8 @@ namespace battleships
 					if (VisualizeGameHandler != null)
 						VisualizeGameHandler(game);
 					if (game.AiCrashed)
-						Console.WriteLine(game.LastError.Message);
-					try
-					{
-						Console.ReadKey();
-					}
-					catch (InvalidOperationException e)
-					{
-						Log(LogMessageType.Error, e.ToString());
-					}
+						WriteLineToStdOut(game.LastError.Message);
+					ReadLineFromStdIn();
 				}
 			}
 		}

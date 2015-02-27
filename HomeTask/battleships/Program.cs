@@ -11,7 +11,7 @@ namespace battleships
 {
 	public class Program
 	{
-		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();		
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
 		private static void Main(string[] args)
 		{
@@ -29,13 +29,15 @@ namespace battleships
 			}
 
 			var settings = new Settings("settings.txt");
+			var textWriter = Console.Out;
+			var textReader = Console.In;
 			var resultsLogger = LogManager.GetLogger(settings.ResultsLoggerName);
 			var processMonitor = new ProcessMonitor(
 				TimeSpan.FromSeconds(settings.TimeLimitSeconds * settings.GamesCount), settings.MemoryLimit);
 			processMonitor.LogMessageHandler += logEventInfo => Logger.Log(logEventInfo);
 			var mapGenerator = new MapGenerator(settings, new Random(settings.RandomSeed));
 			var gameMaps = Enumerable.Range(0, settings.GamesCount).Select(x => mapGenerator.GenerateMap());
-			var aiFactory = new AiFactory(aiPath, processMonitor, Logger);
+			var aiFactory = new AiFactory(aiPath, processMonitor, Logger, textWriter, textReader);
 			var ai = aiFactory.CreateAi();
 			var gameFactory = new GameFactory(Logger);
 			var games = gameMaps.Select(map => gameFactory.CreateGame(map, ai));
@@ -43,11 +45,16 @@ namespace battleships
 			var gameVisualizer = new GameVisualizer();
 			aiTester.VisualizeGameHandler += game => gameVisualizer.Visualize(game);
 			aiTester.LogMessageHandler += logEventInfo => resultsLogger.Log(logEventInfo);
-			IEnumerable<GameStatistics> gameStatistics = aiTester.TestAi(ai, games);
-			var summaryGameStatisticsCalculator = new SummaryGameStatisticsCalculator(settings);
-			summaryGameStatisticsCalculator.LogMessageHandler += logEventInfo => resultsLogger.Log(logEventInfo);
-			summaryGameStatisticsCalculator.PrintSummaryGameStatistics(ai.Name, gameStatistics);
-			ai.Dispose();
+			aiTester.WriteLineHandler += textWriter.WriteLine;
+			aiTester.ReadLineHandler += textReader.ReadLine;
+
+			using (ai)
+			{
+				IEnumerable<GameStatistics> gameStatistics = aiTester.TestAi(ai, games);
+				var summaryGameStatisticsCalculator = new SummaryGameStatisticsCalculator(settings);
+				summaryGameStatisticsCalculator.LogMessageHandler += logEventInfo => resultsLogger.Log(logEventInfo);
+				summaryGameStatisticsCalculator.PrintSummaryGameStatistics(ai.Name, gameStatistics);
+			}
 		}
 	}
 }

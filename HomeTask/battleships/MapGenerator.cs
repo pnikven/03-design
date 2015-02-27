@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using NUnit.Framework;
 
 namespace battleships
 {
@@ -32,19 +31,6 @@ namespace battleships
 				if (map.Set(loc, size, horizontal) || map.Set(loc, size, !horizontal)) return;
 			}
 			throw new Exception("Can't put next ship on map. No free space");
-		}
-	}
-
-	[TestFixture]
-	public class MapGenerator_should
-	{
-		[Test]
-		public void always_succeed_on_standard_map()
-		{
-			var settings = new Settings { Width = 10, Height = 10, Ships = new[] { 1, 1, 1, 1, 2, 2, 2, 3, 3, 4 } };
-			var gen = new MapGenerator(settings, new Random());
-			for (var i = 0; i < 10000; i++)
-				gen.GenerateMap();
 		}
 	}
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.IO;
 using NLog;
 
 namespace battleships
@@ -14,31 +13,30 @@ namespace battleships
 		private readonly string aiExePath;
 		private readonly IProcessMonitor processMonitor;
 		private readonly Logger logger;
+		private readonly TextWriter textWriter;
+		private readonly TextReader textReader;
 
-		public AiFactory(string aiExePath, IProcessMonitor processMonitor, Logger logger)
+		public AiFactory(string aiExePath, IProcessMonitor processMonitor, Logger logger, TextWriter textWriter, TextReader textReader)
 		{
 			this.aiExePath = aiExePath;
 			this.processMonitor = processMonitor;
 			this.logger = logger;
+			this.textWriter = textWriter;
+			this.textReader = textReader;
 		}
 
 		public Ai CreateAi()
-		{			
-			var ai = new Ai(aiExePath);			
-			ai.ProcessCreatedHandler += ai_ProcessCreated;
-			ai.LogMessageHandler += ai_LogMessage;
+		{
+			var ai = new Ai(aiExePath);
+			ai.ProcessCreatedHandler += process => processMonitor.Register(process); ;
+			ai.LogMessageHandler += loggEventInfo =>
+			{
+				if (logger == null) return;
+				logger.Log(loggEventInfo);
+			};
+			ai.WriteLineHandler += message => textWriter.WriteLine(message);
+			ai.ReadLineHandler += () => textReader.ReadLine();
 			return ai;
-		}
-
-		void ai_ProcessCreated(Process process)
-		{
-			processMonitor.Register(process);
-		}
-
-		void ai_LogMessage(LogEventInfo loggEventInfo)
-		{
-			if (logger == null) return;
-			logger.Log(loggEventInfo);
 		}
 	}
 }
