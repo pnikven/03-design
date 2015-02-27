@@ -23,23 +23,7 @@ namespace battleships
 				return;
 			}
 
-			var standardKernel = new StandardKernel();
-			standardKernel.Bind<Settings>().To<Settings>().InSingletonScope()
-				.WithConstructorArgument("settingsFilename", "settings.txt");
-			standardKernel.Bind<ILoggerFactory>().To<LoggerFactory>()
-				.WithConstructorArgument("loggerName", "results");
-			var settings = standardKernel.Get<Settings>();
-			standardKernel.Bind<IMapGenerator>().To<MapGenerator>()
-				.WithConstructorArgument("random", new Random(settings.RandomSeed));
-			standardKernel.Bind<IGameVisualizer>().To<GameVisualizer>();
-			standardKernel.Bind<IProcessMonitor>().To<ProcessMonitor>()
-				.WithConstructorArgument("timeLimit", TimeSpan.FromSeconds(settings.TimeLimitSeconds*settings.GamesCount))
-				.WithConstructorArgument("memoryLimit", (long)settings.MemoryLimit);
-			standardKernel.Bind<IAiFactory>().To<AiFactory>()
-				.WithConstructorArgument("aiExePath", aiPath);
-			standardKernel.Bind<IGameFactory>().To<GameFactory>();
-			standardKernel.Bind<IAiTester>().To<AiTester>();
-
+			var standardKernel = new StandardKernel(new ProgramModule(aiPath));
 			standardKernel.Get<IAiTester>().TestAi();
 		}
 	}
