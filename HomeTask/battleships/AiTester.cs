@@ -8,7 +8,7 @@ namespace battleships
 {
 	public interface IAiTester
 	{
-		void TestAi();
+		void TestAi(string aiExePath);
 	}
 
 	public class AiTester : IAiTester
@@ -17,32 +17,32 @@ namespace battleships
 		private readonly Settings settings;
 		private readonly IMapGenerator mapGenerator;
 		private readonly IGameVisualizer gameVisualizer;
-		private readonly IAiFactory aiFactory;
+		private readonly Func<string, Ai> createAi;
 		private readonly Func<Map, Ai, IGame> createGame;
 		private readonly TextWriter textWriter;
 		private readonly TextReader textReader;
 
 		public AiTester(Settings settings, ILoggerFactory loggerFactory, IMapGenerator mapGenerator,
-			IGameVisualizer gameVisualizer, IAiFactory aiFactory, Func<Map, Ai, IGame> createGame, 
+			IGameVisualizer gameVisualizer, Func<string, Ai> createAi, Func<Map, Ai, IGame> createGame, 
 			TextWriter textWriter, TextReader textReader)
 		{
 			this.settings = settings;
 			resultsLog = loggerFactory.CreateLogger();
 			this.mapGenerator = mapGenerator;
 			this.gameVisualizer = gameVisualizer;
-			this.aiFactory = aiFactory;
+			this.createAi = createAi;
 			this.createGame = createGame;
 			this.textWriter = textWriter;
 			this.textReader = textReader;
 		}
 
-		public void TestAi()
+		public void TestAi(string aiExePath)
 		{            			
 			var badShots = 0;
 			var crashes = 0;
 			var gamesPlayed = 0;
 			var shots = new List<int>();
-			var ai = aiFactory.CreateAi();
+			var ai = createAi(aiExePath);
 			for (var gameIndex = 0; gameIndex < settings.GamesCount; gameIndex++)
 			{
 				var map = mapGenerator.GenerateMap();
@@ -54,7 +54,7 @@ namespace battleships
 				{
 					crashes++;
 					if (crashes > settings.CrashLimit) break;
-					ai = aiFactory.CreateAi();
+					ai.ResetProcess();
 				}
 				else
 					shots.Add(game.TurnsCount);

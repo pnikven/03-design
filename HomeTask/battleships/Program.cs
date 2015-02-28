@@ -23,8 +23,8 @@ namespace battleships
 				return;
 			}
 
-			var standardKernel = new StandardKernel(new ProgramModule(aiPath));
-			standardKernel.Get<IAiTester>().TestAi();
+			var standardKernel = new StandardKernel(new ProgramModule());
+			standardKernel.Get<IAiTester>().TestAi(aiPath);
 		}
 	}
 }

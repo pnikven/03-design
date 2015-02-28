@@ -12,7 +12,7 @@ namespace battleships
 		private Settings settings;
 		private IMapGenerator mapGenerator;
 		private IGameVisualizer gameVisualizer;
-		private IAiFactory aiFactory;
+		private Func<string, Ai> createAi;
 		private Func<Map, Ai, IGame> createGame;
 		private TextWriter textWriter;
 		private TextReader textReader;
@@ -24,7 +24,7 @@ namespace battleships
 			settings = new Settings();
 			mapGenerator = A.Fake<IMapGenerator>();
 			gameVisualizer = A.Fake<IGameVisualizer>();
-			aiFactory = A.Fake<IAiFactory>();
+			createAi = A.Fake<Func<string, Ai>>();
 			var game = A.Fake<IGame>();
 			A.CallTo(() => game.MakeStep()).Invokes(() => A.CallTo(() => game.IsOver()).Returns(true).NumberOfTimes(1));
 			createGame = A.Fake<Func<Map, Ai, IGame>>();
@@ -38,8 +38,8 @@ namespace battleships
 		{
 			settings.GamesCount = new Random().Next(1, 10);
 
-			new AiTester(settings, loggerFactory, mapGenerator, gameVisualizer, aiFactory, createGame,
-				textWriter, textReader).TestAi();
+			new AiTester(settings, loggerFactory, mapGenerator, gameVisualizer, createAi, createGame,
+				textWriter, textReader).TestAi("");
 
 			A.CallTo(() => createGame(A<Map>.Ignored, A<Ai>.Ignored))
 				.MustHaveHappened(Repeated.Exactly.Times(settings.GamesCount));
@@ -47,29 +47,27 @@ namespace battleships
 		}
 
 		[Test]
-		public void create_ai_by_aiFactory_at_least_one_time()
+		public void create_ai_by_createAi_exactly_one_time()
 		{
-			new AiTester(settings, loggerFactory, mapGenerator, gameVisualizer, aiFactory, createGame,
-				textWriter, textReader).TestAi();
+			new AiTester(settings, loggerFactory, mapGenerator, gameVisualizer, createAi, createGame,
+				textWriter, textReader).TestAi("");
 
-			A.CallTo(() => aiFactory.CreateAi()).MustHaveHappened(Repeated.AtLeast.Once);
+			A.CallTo(() => createAi("")).MustHaveHappened(Repeated.Exactly.Once);
 		}
 
 		[Test]
 		public void visualize_each_game_in_Interactive_mode()
 		{
 			settings.GamesCount = new Random().Next(1, 10);
-			settings.CrashLimit = settings.GamesCount;	// Поскольку ai будет фейковый, он каждый раз будет ломаться.
-			// Чтобы тестирование не прекратилось после первого же краха ai,
-			// устанавливаем лимит крахов ai равным количеству игр
+
 			settings.Interactive = true;
 			settings.Ships = new[] { 1 };
 			settings.Width = 1;
 			settings.Height = 1;
 			mapGenerator = new MapGenerator(settings);
 
-			new AiTester(settings, loggerFactory, mapGenerator, gameVisualizer, aiFactory, createGame,
-				textWriter, textReader).TestAi();
+			new AiTester(settings, loggerFactory, mapGenerator, gameVisualizer, createAi, createGame,
+				textWriter, textReader).TestAi("");
 
 			A.CallTo(() => gameVisualizer.Visualize(A<IGame>.Ignored))
 				.MustHaveHappened(Repeated.Exactly.Times(settings.GamesCount));
@@ -78,7 +76,7 @@ namespace battleships
 		[Test]
 		public void create_logger_by_loggerFactory()
 		{
-			new AiTester(settings, loggerFactory, mapGenerator, gameVisualizer, aiFactory, createGame,
+			new AiTester(settings, loggerFactory, mapGenerator, gameVisualizer, createAi, createGame,
 				textWriter, textReader);
 
 			A.CallTo(() => loggerFactory.CreateLogger())
@@ -90,8 +88,8 @@ namespace battleships
 		{
 			settings.GamesCount = new Random().Next(1, 10);
 
-			new AiTester(settings, loggerFactory, mapGenerator, gameVisualizer, aiFactory, createGame,
-				textWriter, textReader).TestAi();
+			new AiTester(settings, loggerFactory, mapGenerator, gameVisualizer, createAi, createGame,
+				textWriter, textReader).TestAi("");
 
 			A.CallTo(() => mapGenerator.GenerateMap())
 				.MustHaveHappened(Repeated.Exactly.Times(settings.GamesCount));
@@ -103,8 +101,8 @@ namespace battleships
 			settings.GamesCount = new Random().Next(1, 10);
 			settings.Verbose = true;
 
-			new AiTester(settings, loggerFactory, mapGenerator, gameVisualizer, aiFactory, createGame,
-				textWriter, textReader).TestAi();
+			new AiTester(settings, loggerFactory, mapGenerator, gameVisualizer, createAi, createGame,
+				textWriter, textReader).TestAi("");
 
 			A.CallTo(() => textWriter.WriteLine(A<string>.That.StartsWith("Game #"), A<object[]>.Ignored))
 				.MustHaveHappened(Repeated.Exactly.Times(settings.GamesCount));

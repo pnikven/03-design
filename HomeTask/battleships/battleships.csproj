@@ -42,6 +42,9 @@
     <Reference Include="Ninject">
       <HintPath>..\packages\Ninject.3.2.2.0\lib\net45-full\Ninject.dll</HintPath>
     </Reference>
+    <Reference Include="Ninject.Extensions.Conventions">
+      <HintPath>..\packages\ninject.extensions.conventions.3.2.0.0\lib\net45-full\Ninject.Extensions.Conventions.dll</HintPath>
+    </Reference>
     <Reference Include="Ninject.Extensions.Factory">
       <HintPath>..\packages\Ninject.Extensions.Factory.3.2.1.0\lib\net45-full\Ninject.Extensions.Factory.dll</HintPath>
     </Reference>
@@ -62,7 +65,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Ai.cs" />
-    <Compile Include="AiFactory.cs" />
     <Compile Include="AiTester_should.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="GameVisualizer.cs" />
