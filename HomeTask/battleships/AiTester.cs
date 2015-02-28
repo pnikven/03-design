@@ -18,12 +18,12 @@ namespace battleships
 		private readonly IMapGenerator mapGenerator;
 		private readonly IGameVisualizer gameVisualizer;
 		private readonly IAiFactory aiFactory;
-		private readonly IGameFactory gameFactory;
+		private readonly Func<Map, Ai, IGame> createGame;
 		private readonly TextWriter textWriter;
 		private readonly TextReader textReader;
 
 		public AiTester(Settings settings, ILoggerFactory loggerFactory, IMapGenerator mapGenerator,
-			IGameVisualizer gameVisualizer, IAiFactory aiFactory, IGameFactory gameFactory, 
+			IGameVisualizer gameVisualizer, IAiFactory aiFactory, Func<Map, Ai, IGame> createGame, 
 			TextWriter textWriter, TextReader textReader)
 		{
 			this.settings = settings;
@@ -31,7 +31,7 @@ namespace battleships
 			this.mapGenerator = mapGenerator;
 			this.gameVisualizer = gameVisualizer;
 			this.aiFactory = aiFactory;
-			this.gameFactory = gameFactory;
+			this.createGame = createGame;
 			this.textWriter = textWriter;
 			this.textReader = textReader;
 		}
@@ -46,7 +46,7 @@ namespace battleships
 			for (var gameIndex = 0; gameIndex < settings.GamesCount; gameIndex++)
 			{
 				var map = mapGenerator.GenerateMap();
-				var game = gameFactory.CreateGame(map, ai);
+				var game = createGame(map, ai);
 				RunGameToEnd(game);
 				gamesPlayed++;
 				badShots += game.BadShots;
@@ -69,7 +69,7 @@ namespace battleships
 			WriteTotal(ai, shots, crashes, badShots, gamesPlayed);
 		}
 
-		private void RunGameToEnd(Game game)
+		private void RunGameToEnd(IGame game)
 		{
 			while (!game.IsOver())
 			{

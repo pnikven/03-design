@@ -10,7 +10,21 @@ namespace battleships
 		public Vector Target;
 	}
 
-	public class Game
+	public interface IGame
+	{
+		Vector LastTarget { get; }
+		int TurnsCount { get; }
+		int BadShots { get; }
+		Map Map { get; }
+		ShotInfo LastShotInfo { get; }
+		bool AiCrashed { get; }
+		Exception LastError { get; }
+
+		bool IsOver();
+		void MakeStep();
+	}
+
+	public class Game : IGame
 	{
 		private static readonly Logger log = LogManager.GetCurrentClassLogger();
 		private readonly Ai ai;

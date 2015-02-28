@@ -13,10 +13,10 @@ namespace battleships
 		private readonly Settings settings;
 		private readonly Random random;
 
-		public MapGenerator(Settings settings, Random random)
+		public MapGenerator(Settings settings)
 		{
 			this.settings = settings;
-			this.random = random;
+			random = new Random(settings.RandomSeed);
 		}
 
 		public Map GenerateMap()

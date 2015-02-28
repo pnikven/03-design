@@ -32,12 +32,18 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Castle.Core">
+      <HintPath>..\packages\Castle.Core.3.2.2\lib\net45\Castle.Core.dll</HintPath>
+    </Reference>
     <Reference Include="FakeItEasy, Version=1.25.2.0, Culture=neutral, PublicKeyToken=eff28e2146d5fd2c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\FakeItEasy.1.25.2\lib\net40\FakeItEasy.dll</HintPath>
     </Reference>
     <Reference Include="Ninject">
       <HintPath>..\packages\Ninject.3.2.2.0\lib\net45-full\Ninject.dll</HintPath>
+    </Reference>
+    <Reference Include="Ninject.Extensions.Factory">
+      <HintPath>..\packages\Ninject.Extensions.Factory.3.2.1.0\lib\net45-full\Ninject.Extensions.Factory.dll</HintPath>
     </Reference>
     <Reference Include="NLog">
       <HintPath>..\external_packages\NLog.dll</HintPath>
@@ -59,7 +65,6 @@
     <Compile Include="AiFactory.cs" />
     <Compile Include="AiTester_should.cs" />
     <Compile Include="Game.cs" />
-    <Compile Include="GameFactory.cs" />
     <Compile Include="GameVisualizer.cs" />
     <Compile Include="LoggerFactory.cs" />
     <Compile Include="Map.cs" />
